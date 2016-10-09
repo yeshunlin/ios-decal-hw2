@@ -13,7 +13,6 @@ class ViewController: UIViewController {
     var w: CGFloat!
     var h: CGFloat!
     
-
     // IMPORTANT: Do NOT modify the name or class of resultLabel.
     //            We will be using the result label to run autograded tests.
     // MARK: The label to display our calculations
@@ -21,8 +20,9 @@ class ViewController: UIViewController {
     
     // TODO: This looks like a good place to add some data structures.
     //       One data structure is initialized below for reference.
-    var someDataStructure: [String] = [""]
-    
+    var currNum = "0"
+    var prevNum = "0"
+    var currOp = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,55 +43,104 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    // TODO: A method to update your data structure(s) would be nice.
-    //       Modify this one or create your own.
-    func updateSomeDataStructure(_ content: String) {
-        print("Update me like one of those PCs")
-    }
-    
     // TODO: Ensure that resultLabel gets updated.
     //       Modify this one or create your own.
-    func updateResultLabel(_ content: String) {
-        print("Update me like one of those PCs")
+    func updateResultLabel() {
+        let checkInt = Double(currNum)
+        if checkInt == floor(checkInt!) {
+            let dispNum = Int(checkInt!)
+            resultLabel.text = String(dispNum)
+        } else {
+            resultLabel.text = currNum
+        }
     }
     
-    
-    // TODO: A calculate method with no parameters, scary!
-    //       Modify this one or create your own.
-    func calculate() -> String {
-        return "0"
-    }
-    
-    // TODO: A simple calculate method for integers.
-    //       Modify this one or create your own.
-    func intCalculate(a: Int, b:Int, operation: String) -> Int {
-        print("Calculation requested for \(a) \(operation) \(b)")
-        return 0
-    }
-    
-    // TODO: A general calculate method for doubles
+    // TODO: A general calculate method for doubles *
     //       Modify this one or create your own.
     func calculate(a: String, b:String, operation: String) -> Double {
-        print("Calculation requested for \(a) \(operation) \(b)")
-        return 0.0
+        // print("Calculation requested for \(a) \(operation) \(b)")
+        let aDouble = Double(a)
+        let bDouble = Double(b)
+        if operation == "+" {
+            return aDouble! + bDouble!
+        } else if operation == "-" {
+            return aDouble! - bDouble!
+        } else if operation == "*" {
+            return aDouble! * bDouble!
+        } else if operation == "/" {
+            return aDouble! / bDouble!
+        } else {
+            return 0
+        }
     }
     
     // REQUIRED: The responder to a number button being pressed.
     func numberPressed(_ sender: CustomButton) {
         guard Int(sender.content) != nil else { return }
-        print("The number \(sender.content) was pressed")
-        // Fill me in!
+        //print("The number \(sender.content) was pressed")
+        if currNum == "0" {
+            currNum = sender.content
+        } else if currNum.characters.count < 7 {
+            currNum.append(sender.content)
+        }
+        updateResultLabel()
     }
     
     // REQUIRED: The responder to an operator button being pressed.
     func operatorPressed(_ sender: CustomButton) {
-        // Fill me in!
+        if sender.content == "C" {
+            currNum = "0"
+            prevNum = "0"
+            currOp = ""
+            updateResultLabel()
+        } else if sender.content == "+/-" {
+            if currNum.characters.first == "-" {
+                currNum.remove(at: currNum.startIndex)
+            } else {
+                currNum.insert("-", at: currNum.startIndex)
+            }
+            updateResultLabel()
+        } else if sender.content == "=" {
+            currNum = String(calculate(a: prevNum, b: currNum, operation: currOp))
+            prevNum = "0"
+            currOp = ""
+            updateResultLabel()
+        } else if sender.content == "%" {
+            currNum = String(calculate(a: currNum, b: "100", operation: "/"))
+            prevNum = "0"
+            updateResultLabel()
+        } else if sender.content == "." {
+            if currNum == "0" {
+                currNum.append(".")
+            } else if !currNum.contains(".") {
+                currNum.insert(".", at: currNum.endIndex)
+            }
+            updateResultLabel()
+        } else if currOp == "" {
+            currOp = sender.content
+            prevNum = currNum
+            currNum = "0"
+            updateResultLabel()
+        } else {
+            currNum = String(calculate(a: prevNum, b: currNum, operation: currOp))
+            currOp = sender.content
+            updateResultLabel()
+            prevNum = currNum
+            currNum = "0"
+        }
     }
     
     // REQUIRED: The responder to a number or operator button being pressed.
     func buttonPressed(_ sender: CustomButton) {
-       // Fill me in!
+        let input = sender.content
+        let isNum = Int(input)
+        if isNum == nil {
+            operatorPressed(sender)
+        } else if currNum.characters.count <= 7 {
+            numberPressed(sender)
+        }
     }
+    
     
     // IMPORTANT: Do NOT change any of the code below.
     //            We will be using these buttons to run autograded tests.
